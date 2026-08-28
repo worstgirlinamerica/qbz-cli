@@ -15,7 +15,16 @@ from qbz.config import getboolean
 from qbz.paths import configured_token_path, output_path
 from qbz.quality import validate_response
 from rich.console import Console
-from rich.progress import BarColumn, Progress, TaskProgressColumn, TextColumn
+from rich.progress import (
+    BarColumn,
+    DownloadColumn,
+    Progress,
+    TaskProgressColumn,
+    TextColumn,
+    TimeElapsedColumn,
+    TimeRemainingColumn,
+    TransferSpeedColumn,
+)
 
 from mutagen.flac import FLAC, Picture
 from mutagen.id3 import ID3, APIC, TXXX, USLT, TIT2, TPE1, TALB, TPE2, TRCK, TPOS, TCON, TDRC, TCOM, TCOP, TSRC, TPUB
@@ -118,7 +127,7 @@ OUTPUT_ROOT = output_path()
 OUTPUT_ROOT.mkdir(exist_ok=True)
 
 def tqdm_download(url, output_path, title=None):
-    """Download a file with a compact Rich progress bar."""
+    """Download a file with a detailed Rich transfer display."""
     try:
         with requests.get(url, stream=True, timeout=60) as r:
             r.raise_for_status()
@@ -128,6 +137,10 @@ def tqdm_download(url, output_path, title=None):
                 TextColumn("[cyan]{task.description}"),
                 BarColumn(bar_width=None, complete_style="bright_cyan", finished_style="bright_cyan", pulse_style="bright_cyan"),
                 TaskProgressColumn(style="bright_white"),
+                DownloadColumn(),
+                TransferSpeedColumn(),
+                TimeElapsedColumn(),
+                TimeRemainingColumn(),
                 expand=True,
                 transient=False,
             ) as progress:
